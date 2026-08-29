@@ -1,5 +1,5 @@
 class Wordle {
-  constructor(parent, words = ["mamaw", "chile", "slide"], grid = {rows: 5, columns: 7}) {
+  constructor(parent, words = ["chain", "lanes", "chile", "slide"], grid = {rows: 5, columns: 7}) {
     this.columns = grid.columns;
     this.rows = grid.rows;
     this.container = parent;
@@ -43,6 +43,7 @@ class Wordle {
       for(let x = 0; x < this.rows; x++) {
         const row = document.createElement("input");
         row.setAttribute("class", "row");
+        row.setAttribute("enterkeyhint", "enter");
         row.setAttribute("maxlength", "1");
         col.appendChild(row);
         row.addEventListener("input", (e) => {
@@ -55,11 +56,13 @@ class Wordle {
           
         });
         row.addEventListener("keydown", (e) => {
+          console.log(e)
           const prev = e.target.previousElementSibling;
           const next = e.target.nextElementSibling;
           const value = e.target.value;
           const parent = e.target.parentNode;
           const nextCol = parent.nextElementSibling;
+          
           if(e.key === "Backspace" && prev && value.length <= 0) prev.focus();
           if(e.key === "Enter" && !next && value.length > 0) {
             console.log(this.setColor(parent))
@@ -110,6 +113,3 @@ class Wordle {
     return this.words[Math.floor(Math.random()*this.words.length)];
   }
 }
-const myWords = ['falls', 'group', 'jokes', 'mains', 'kites', 'liver', 'grunt', 'money', 'choke', 'grant', 'warms', 'charm', 'queue', 'barns', 'slack']
-const game = new Wordle(document.getElementById("container"), myWords, {rows: 5, columns: 7});
-game.render();
