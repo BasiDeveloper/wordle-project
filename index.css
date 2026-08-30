@@ -5,25 +5,28 @@
 }
 body {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
-  align-items: center;
+  overflow: auto;
   justify-content: center;
   background-color: #468cceff;
 }
 #container {
-  display: grid;
+  margin-top: 40px;
+  height: auto;
+  
+  display: flex;
+  flex-direction: column;
   gap: 5px;
+  position: relative;
 }
 .column {
   display: flex;
   gap: 5px;
 }
 .row {
-  width: 50px;
-  height: 50px;
+  
   text-align: center;
-  font-size: 25px;
   text-transform: uppercase;
   border: 1px solid #dedede;
   
@@ -51,3 +54,20 @@ body {
 :disabled {
   color: white;
 }
+.game-over {
+  position: absolute;
+  top: 50%;
+  transform: translateY(calc(-50% - 50px));
+  width: 100%;
+  background-color: hwb(157 46% 17%);
+  padding: 10px;
+  z-index: 1000;
+  
+}
+.game-over h2, .game-over p{
+  text-align: center;
+  text-transform: uppercase;
+}
+.game-over.hide {
+  display: none;
+  }
