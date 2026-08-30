@@ -1,10 +1,14 @@
 class Wordle {
-  constructor(parent, words = ["mamaw", "chile", "slide"], grid = {rows: 5, columns: 7}) {
+  constructor(parent = document.body, words = ["mamaw", "chile", "slide"], grid = {rows: 5, columns: 7}) {
     this.columns = grid.columns;
     this.rows = grid.rows;
     this.container = parent;
+    this.size = Math.min((window.innerWidth / grid.rows) - 10, 135);
+    this.wordle_id = this.container.classList.length > 0 ? '.'+this.container.classList[0]:'#'+this.container.id;
     try {
       if(!words.every(item => item.length === this.rows)) throw "Word must the same length as the inputs"   
+      this.greens = []; 
+      console.log(this.size)
       this.words = words;
       this.isWarn = false;
       this.guess = this.getRandom().split("");
@@ -36,7 +40,7 @@ class Wordle {
       this.container.appendChild(warn);
       return;
     } 
-    console.log(this.guess)
+    console.log(this.guess) //cheater
     for(let y = 0; y < this.columns; y++) {
       const col = document.createElement("div");
       col.setAttribute("class", "column");
@@ -45,6 +49,9 @@ class Wordle {
         row.setAttribute("class", "row");
         row.setAttribute("enterkeyhint", "enter");
         row.setAttribute("maxlength", "1");
+        row.style.width = this.size+"px";
+        row.style.height = this.size+"px";
+        row.style.fontSize = (this.size*0.5)+"px";
         col.appendChild(row);
         row.addEventListener("input", (e) => {
           //console.log(e)
@@ -56,7 +63,7 @@ class Wordle {
           
         });
         row.addEventListener("keydown", (e) => {
-          console.log(e)
+          //console.log(e)
           const prev = e.target.previousElementSibling;
           const next = e.target.nextElementSibling;
           const value = e.target.value;
@@ -65,8 +72,15 @@ class Wordle {
           
           if(e.key === "Backspace" && prev && value.length <= 0) prev.focus();
           if(e.key === "Enter" && !next && value.length > 0) {
-            console.log(this.setColor(parent))
-            if(nextCol) nextCol.firstElementChild.focus();
+            if(nextCol && nextCol.classList.contains("column")) {
+              this.setColor(parent);
+              nextCol.firstElementChild.focus();
+            }
+            else if(nextCol && nextCol.className === "newGame" && this.greens.length < 5) {
+              this.setColor(parent);
+              this.gameOver();
+            }
+            console.log(this.greens)
           }
         });
         
@@ -77,17 +91,21 @@ class Wordle {
     const newGame = document.createElement("button");
     newGame.setAttribute("class", "newGame");
     newGame.innerText = "new game";
+    newGame.style.fontSize = (this.size*0.3)+"px";
     newGame.addEventListener("click", () => this.newGame);
     this.container.appendChild(newGame);
+
+    
   }
   setColor(parent) {
     const children = [...parent.children];
-    let greens = [], yellows = [], yellow;
+    this.greens = [];
+    let yellows = [];
     for(let index = 0; index < children.length; index++) {
       const value = children[index].value;
       const guess = this.guess;
       for(let sub_index = 0; sub_index < guess.length; sub_index++) {
-        const greenFound = greens.some(sub_found => sub_found === sub_index);
+        const greenFound = this.greens.some(sub_found => sub_found === sub_index);
         const yellowFound = yellows.some(sub_found => sub_found.to === sub_index);
 
         
@@ -97,7 +115,7 @@ class Wordle {
             const yellowIndex = yellows.find(item => item.to === sub_index);
             children[yellowIndex.from].classList.remove("yellow");
           }
-          greens.push(sub_index);
+          if(!this.greens.some(item => item === sub_index)) this.greens.push(sub_index);
         }
         else if(index !== sub_index && value === guess[sub_index] && !greenFound && !yellowFound) {
           children[index].classList.add("yellow");
@@ -109,16 +127,33 @@ class Wordle {
         else children[index].classList.add("none");
       }
       children[index].setAttribute("disabled", "true");
-      children[index].style = `animation-name: scale-bounce; animation-duration: 0.5s; animation-delay: 0.${index}s;`
+      children[index].style.animationName = "scale-bounce";
+      children[index].style.animationDuration = "0.5s";
+      children[index].style.animationDelay = `0.${index}s`
     }
-    if(greens.length == this.rows) {
-      const allRows = document.querySelectorAll("input.row");
+    
+    if(this.greens.length == this.rows) {
+      const allRows = document.querySelectorAll(`${this.wordle_id} .row`);
+      console.log(this.container.classList)
       allRows.forEach(items => items.setAttribute("disabled", "true"));
       this.guess = this.getRandom().split("");
-      
+      this.greens = [];
     }
+  }
+  gameOver() {
+    const gameOverContainer = document.createElement("div");
+    gameOverContainer.setAttribute("class", "game-over");
+    const title = document.createElement("h2");
+    title.innerText = "The word is";
+    const theGuess = document.createElement("p");
+    theGuess.setAttribute("id", "wd-reveal")
+    theGuess.innerText = this.guess.join("");
+    gameOverContainer.appendChild(title);
+    gameOverContainer.appendChild(theGuess);
+    this.container.appendChild(gameOverContainer);
+    this.greens = [];
   }
   getRandom() {
     return this.words[Math.floor(Math.random()*this.words.length)];
   }
-          }
+        }
