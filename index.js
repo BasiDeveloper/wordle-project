@@ -1,5 +1,5 @@
 class Wordle {
-  constructor(parent, words = ["chain", "lanes", "chile", "slide"], grid = {rows: 5, columns: 7}) {
+  constructor(parent, words = ["mamaw", "chile", "slide"], grid = {rows: 5, columns: 7}) {
     this.columns = grid.columns;
     this.rows = grid.rows;
     this.container = parent;
@@ -82,20 +82,29 @@ class Wordle {
   }
   setColor(parent) {
     const children = [...parent.children];
-    let greens = [], yellows = [];
+    let greens = [], yellows = [], yellow;
     for(let index = 0; index < children.length; index++) {
       const value = children[index].value;
       const guess = this.guess;
       for(let sub_index = 0; sub_index < guess.length; sub_index++) {
         const greenFound = greens.some(sub_found => sub_found === sub_index);
-        const yellowFound = yellows.some(sub_found => sub_found === sub_index);
+        const yellowFound = yellows.some(sub_found => sub_found.to === sub_index);
+
+        
         if(index === sub_index && value === guess[sub_index]) {
           children[index].classList.add("green");
+          if(yellowFound) {
+            const yellowIndex = yellows.find(item => item.to === sub_index);
+            children[yellowIndex.from].classList.remove("yellow");
+          }
           greens.push(sub_index);
         }
         else if(index !== sub_index && value === guess[sub_index] && !greenFound && !yellowFound) {
           children[index].classList.add("yellow");
-          yellows.push(sub_index);
+          yellows.push({
+            from: index,
+            to: sub_index
+          });
         }
         else children[index].classList.add("none");
       }
@@ -112,4 +121,4 @@ class Wordle {
   getRandom() {
     return this.words[Math.floor(Math.random()*this.words.length)];
   }
-}
+          }
